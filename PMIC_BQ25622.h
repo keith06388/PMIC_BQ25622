@@ -13,6 +13,8 @@ typedef enum {
     Charge_Current_Limit_MSB   	= 0x03,
 	Charge_Voltage_Limit_LSB	= 0x04,
 	Charge_Voltage_Limit_MSB	= 0x05,
+	Input_Current_Limit_LSB    	= 0x06,
+    Input_Current_Limit_MSB    	= 0x07,
     Input_Voltage_Limit_LSB    	= 0x08,
     Input_Voltage_Limit_MSB    	= 0x09,
 	Precharge_Control_LSB		= 0x10,
@@ -20,6 +22,7 @@ typedef enum {
     Termination_Control_LSB    	= 0x12,
     Termination_Control_MSB  	= 0x13,
     Charge_Control_0        	= 0x14,
+	Charger_Control_1       	= 0x16,
 	Charger_Control_2       	= 0x17,
     Charger_Control_4       	= 0x19,
     NTC_Control_0    			= 0x1A,
@@ -40,7 +43,7 @@ typedef enum {
 
 typedef struct {
     uint8_t reserved:6;
-    uint8_t ichg:6;
+    uint16_t ichg:6;
     uint8_t reserved1:4;
 } ichg_reg_t __attribute__(());
 
@@ -51,6 +54,12 @@ typedef struct {
 } vreg_reg_t __attribute__(());
 
 typedef struct {
+    uint8_t reserved:4;
+    uint16_t iindpm:8;
+    uint8_t reserved1:4;
+} iindpm_reg_t __attribute__(());
+
+typedef struct {
     uint8_t reserved:5;
     uint16_t vindpm:9;
     uint8_t reserved1:2;
@@ -58,13 +67,13 @@ typedef struct {
 
 typedef struct {
 	uint8_t reserved:4;
-    uint8_t iprechg:5;
+    uint16_t iprechg:5;
     uint8_t reserved1:7;
 } ipre_reg_t __attribute__(());
 
 typedef struct {
 	uint8_t reserved:3;
-    uint8_t iterm:6;
+    uint16_t iterm:6;
 	uint8_t reserved1:7;
 } iterm_reg_t __attribute__(());
 
@@ -77,6 +86,16 @@ typedef struct {
     uint8_t q4_fullon:1;
     uint8_t q1_fullon:1;
 } ctrl0_reg_t __attribute__(());
+
+typedef struct {
+	uint8_t watchdog:2;
+	uint8_t wd_rst:1;
+    uint8_t force_pmid_dis:1;
+    uint8_t en_hiz:1;
+    uint8_t en_chg:1;
+    uint8_t force_ibatdis:1;
+	uint8_t en_auto_ibatdis:1;
+} ctrl1_reg_t __attribute__(());
 
 typedef struct {
     uint8_t vbus_ovp:1;
@@ -123,20 +142,20 @@ typedef struct {
 } adc_dis_reg_t __attribute__(());
 
 typedef struct {
-	uint8_t reserved:1;
-    uint16_t ichgr:15;
+	uint8_t reserved:2;
+	uint16_t ichgr:14;
 } ichgr_reg_t __attribute__(());
 
 typedef struct {
-	uint8_t reserved1:1;
+	uint8_t reserved:2;
     uint16_t vbusv:13;
-    uint8_t reserved:2;
+    uint8_t reserved1:1;
 } vbusv_reg_t __attribute__(());
 
 typedef struct {
-	uint8_t reserved1:3;
+	uint8_t reserved:1;
     uint16_t batv:12;
-    uint8_t reserved:1;
+    uint8_t reserved1:3;
 } batv_reg_t __attribute__(());
 
 
@@ -150,9 +169,15 @@ class PMIC_BQ25622 {
 
     // Reads 16 bytes from a register.
     void _read(bq25622_reg_t reg, uint8_t *val);
+	
+	// Reads 16 bytes from a register.
+    void _read2(bq25622_reg_t reg, uint16_t *val);
 
     // Writes 16 bytes to a register.
     void _write(bq25622_reg_t reg, uint8_t *val);
+	
+	// Writes 16 bytes to a register.
+    void _write2(bq25622_reg_t reg, uint16_t *val);
 
 public:
 
@@ -175,6 +200,11 @@ public:
 	vreg_reg_t getVREG_reg();
 	bq25622_error_t setVREG(int value);
 	uint16_t getVREG();
+	
+	// REG06
+	iindpm_reg_t getIINDPM_reg();
+	bq25622_error_t setIINDPM(int value);
+	uint16_t getIINDPM();
 
 	// REG08
 	vindpm_reg_t getVINDPM_reg();
@@ -195,9 +225,16 @@ public:
 	ctrl0_reg_t getCTRL0_reg();
 	void setQ1_FULLON(bool value);
 	void setQ4_FULLON(bool value);
+	
+	// REG16
+	ctrl1_reg_t getCTRL1_reg();
+	void setEN_CHG(bool value);
+	void setWATCHDOG(bool value);
 
 	// REG17
 	ctrl2_reg_t getCTRL2_reg();
+	void setCONV_STRN(int value);
+	void setCONV_FREQ(int value);
 	void setREG_RST(bool value);
 
 	// REG19
