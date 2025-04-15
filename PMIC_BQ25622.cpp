@@ -150,6 +150,29 @@ uint16_t PMIC_BQ25622::getVINDPM(){
     return data;
 }
 
+// REG0E
+vsysmin_reg_t PMIC_BQ25622::getVSYSMIN_reg(){
+    vsysmin_reg_t temp_reg;
+    _read2(Minimal_System_Voltage_LSB, (uint16_t*)&temp_reg);
+    return temp_reg;
+}
+bq25622_error_t PMIC_BQ25622::setVSYSMIN(int value){
+    vsysmin_reg_t temp_reg;
+    if(value < 2560 || value > 3840){
+        return BQ_RANGE_ERR;
+    }
+    uint16_t data = value / 80;
+    _read2(Minimal_System_Voltage_LSB, (uint16_t*)&temp_reg);
+    temp_reg.vsysmin = data;
+    _write2(Minimal_System_Voltage_LSB, (uint16_t*)&temp_reg); // Write the low byte
+    return BQ_OK;
+}
+uint16_t PMIC_BQ25622::getVSYSMIN(){
+    vsysmin_reg_t temp_reg = PMIC_BQ25622::getVSYSMIN_reg();
+    uint16_t data = (temp_reg.vsysmin * 80);
+    return data;
+}
+
 // REG10
 ipre_reg_t PMIC_BQ25622::getIPRE_reg(){
     ipre_reg_t temp_reg;
@@ -196,6 +219,55 @@ uint16_t PMIC_BQ25622::getITERM(){
     return data;
 }
 
+// REG13
+chg_timer_0_reg_t PMIC_BQ25622::getCHG_TIMER_reg(){
+    chg_timer_0_reg_t temp_reg;
+    _read(Charge_Timer_Control, (uint8_t*)&temp_reg);
+    return temp_reg;
+}
+void PMIC_BQ25622::setTMR2X_EN(bool value){
+    chg_timer_0_reg_t temp_reg;
+    _read(Charge_Timer_Control, (uint8_t*)&temp_reg);
+    temp_reg.tmr2x_en = value;
+    _write(Charge_Timer_Control, (uint8_t*)&temp_reg);
+}
+void PMIC_BQ25622::setEN_SAFETY_TMR(bool value){
+    chg_timer_0_reg_t temp_reg;
+    _read(Charge_Timer_Control, (uint8_t*)&temp_reg);
+    temp_reg.en_safety_tmrs = value;
+    _write(Charge_Timer_Control, (uint8_t*)&temp_reg);
+}
+void PMIC_BQ25622::setPRECHG_TMR(bool value){
+    chg_timer_0_reg_t temp_reg;
+    _read(Charge_Timer_Control, (uint8_t*)&temp_reg);
+    temp_reg.prechg_tmr = value;
+    _write(Charge_Timer_Control, (uint8_t*)&temp_reg);
+}
+void PMIC_BQ25622::setCHG_TIMER(bool value){
+    chg_timer_0_reg_t temp_reg;
+    _read(Charge_Timer_Control, (uint8_t*)&temp_reg);
+    temp_reg.chg_timer = value;
+    _write(Charge_Timer_Control, (uint8_t*)&temp_reg);
+}
+void PMIC_BQ25622::setEN_AUTO_INDET(bool value){
+    chg_timer_0_reg_t temp_reg;
+    _read(Charger_Control_4, (uint8_t*)&temp_reg);
+    temp_reg.en_auto_indet = value;
+    _write(Charger_Control_4, (uint8_t*)&temp_reg);
+}
+void PMIC_BQ25622::setFORCE_INDET(bool value){
+    chg_timer_0_reg_t temp_reg;
+    _read(Charger_Control_4, (uint8_t*)&temp_reg);
+    temp_reg.force_indet = value;
+    _write(Charger_Control_4, (uint8_t*)&temp_reg);
+}
+void PMIC_BQ25622::setEN_DCP_BIAS(bool value){
+    chg_timer_0_reg_t temp_reg;
+    _read(Charger_Control_4, (uint8_t*)&temp_reg);
+    temp_reg.en_dcp_bias = value;
+    _write(Charger_Control_4, (uint8_t*)&temp_reg);
+}
+
 // REG14
 ctrl0_reg_t PMIC_BQ25622::getCTRL0_reg(){
     ctrl0_reg_t temp_reg;
@@ -214,6 +286,29 @@ void PMIC_BQ25622::setQ4_FULLON(bool value){
     temp_reg.q4_fullon = value;
     _write(Charge_Control_0, (uint8_t*)&temp_reg);
 }
+bq25622_error_t PMIC_BQ25622::setTOPOFF_TMR(int value){
+    switch (value){
+        case 0:
+            value = 0b00;
+            break;
+        case 17:
+            value = 0b01;
+            break;
+        case 35:
+            value = 0b10;
+            break;
+        case 52:
+            value = 0b11;
+            break;
+        default:
+            return BQ_RANGE_ERR;
+    }
+    ctrl0_reg_t temp_reg;
+    _read(Charge_Control_0, (uint8_t*)&temp_reg);
+    temp_reg.topoff_tmr = value;
+    _write(Charge_Control_0, (uint8_t*)&temp_reg);
+    return BQ_OK;
+}
 
 // REG16
 ctrl1_reg_t PMIC_BQ25622::getCTRL1_reg(){
@@ -227,11 +322,28 @@ void PMIC_BQ25622::setEN_CHG(bool value){
     temp_reg.en_chg = value;
     _write(Charger_Control_1, (uint8_t*)&temp_reg);
 }
-void PMIC_BQ25622::setWATCHDOG(bool value){
+bq25622_error_t PMIC_BQ25622::setWATCHDOG(int value){
+    switch(value) {
+        case 0:
+            value = 0b00;
+            break;
+        case 50:
+            value = 0b01;
+            break;
+        case 100:
+            value = 0b10;
+            break;
+        case 200:
+            value = 0b11;
+            break;
+        default:
+            return BQ_RANGE_ERR;
+    }
     ctrl1_reg_t temp_reg;
     _read(Charger_Control_1, (uint8_t*)&temp_reg);
     temp_reg.watchdog = value;
     _write(Charger_Control_1, (uint8_t*)&temp_reg);
+    return BQ_OK;
 }
 
 // REG17
@@ -239,6 +351,23 @@ ctrl2_reg_t PMIC_BQ25622::getCTRL2_reg(){
     ctrl2_reg_t temp_reg;
     _read(Charger_Control_2, (uint8_t*)&temp_reg);
     return temp_reg;
+}
+bq25622_error_t PMIC_BQ25622::setVBUS_OVP(int value){
+    ctrl2_reg_t temp_reg;
+    switch(value) {
+        case 6:
+            value = 0b0;
+            break;
+        case 18:
+            value = 0b1;
+            break;
+        default:
+            return BQ_RANGE_ERR;
+    }
+    _read(Charger_Control_2, (uint8_t*)&temp_reg);
+    temp_reg.vbus_ovp = value;
+    _write(Charger_Control_2, (uint8_t*)&temp_reg);
+    return BQ_OK; 
 }
 void PMIC_BQ25622::setCONV_STRN(int value){
     ctrl2_reg_t temp_reg;
@@ -251,6 +380,24 @@ void PMIC_BQ25622::setCONV_FREQ(int value){
     _read(Charger_Control_2, (uint8_t*)&temp_reg);
     temp_reg.set_conv_freq = value;
     _write(Charger_Control_2, (uint8_t*)&temp_reg);
+}
+bq25622_error_t PMIC_BQ25622::setTREG(int value) {
+    switch (value)
+    {
+        case 60:
+            value = 0b0;
+            break;
+        case 120:
+            value = 0b1;
+            break; 
+        default:
+            return BQ_RANGE_ERR;
+    }
+    ctrl2_reg_t temp_reg;
+    _read(Charger_Control_2, (uint8_t*)&temp_reg);
+    temp_reg.treg = value;
+    _write(Charger_Control_2, (uint8_t*)&temp_reg);
+    return BQ_OK;
 }
 void PMIC_BQ25622::setREG_RST(bool value){
     ctrl2_reg_t temp_reg;
@@ -304,15 +451,40 @@ void PMIC_BQ25622::setCONV_RATE(bool value){
     _write(ADC_Control, (uint8_t*)&temp_reg);
 }
 bq25622_error_t PMIC_BQ25622::setADC_SAMPLE(int value){
-    adc_ctrl_reg_t temp_reg;
-    if(value < 0 || value > 3){
-        return BQ_RANGE_ERR;
+    switch(value) {
+        case 12:
+            value = 0b00;
+            break;
+        case 11:
+            value = 0b01;
+            break;
+        case 10:
+            value = 0b10;
+            break;
+        case 9:
+            value = 0b11;
+            break;
+        default:
+            return BQ_RANGE_ERR;
     }
+    adc_ctrl_reg_t temp_reg;
     uint16_t data = value;
     _read(ADC_Control, (uint8_t*)&temp_reg);
     temp_reg.adc_sample = data;
     _write(ADC_Control, (uint8_t*)&temp_reg);
     return BQ_OK; 
+}
+void PMIC_BQ25622::setADC_AVG(bool value){
+    adc_ctrl_reg_t temp_reg;
+    _read(ADC_Control, (uint8_t*)&temp_reg);
+    temp_reg.adc_avg = value;
+    _write(ADC_Control, (uint8_t*)&temp_reg);
+}
+void PMIC_BQ25622::setADC_AVG_INIT(bool value){
+    adc_ctrl_reg_t temp_reg;
+    _read(ADC_Control, (uint8_t*)&temp_reg);
+    temp_reg.adc_avg_init = value;
+    _write(ADC_Control, (uint8_t*)&temp_reg);
 }
 
 // REG27
@@ -321,49 +493,49 @@ adc_dis_reg_t PMIC_BQ25622::getADC_DIS_reg(){
     _read(ADC_Function_Disable_0, (uint8_t*)&temp_reg);
     return temp_reg;
 }
-void PMIC_BQ25622::setVPMID_DIS(bool value){
+void PMIC_BQ25622::setVPMID_ADC_DIS(bool value){
     adc_dis_reg_t temp_reg;
     _read(ADC_Function_Disable_0, (uint8_t*)&temp_reg);
     temp_reg.vpmid_adc_dis = value;
     _write(ADC_Function_Disable_0, (uint8_t*)&temp_reg);
 }
-void PMIC_BQ25622::setTDIE_DIS(bool value){
+void PMIC_BQ25622::setTDIE_ADC_DIS(bool value){
     adc_dis_reg_t temp_reg;
     _read(ADC_Function_Disable_0, (uint8_t*)&temp_reg);
     temp_reg.tdie_adc_dis = value;
     _write(ADC_Function_Disable_0, (uint8_t*)&temp_reg);
 }
-void PMIC_BQ25622::setTS_DIS(bool value){
+void PMIC_BQ25622::setTS_ADC_DIS(bool value){
     adc_dis_reg_t temp_reg;
     _read(ADC_Function_Disable_0, (uint8_t*)&temp_reg);
     temp_reg.ts_adc_dis = value;
     _write(ADC_Function_Disable_0, (uint8_t*)&temp_reg);
 }
-void PMIC_BQ25622::setVSYS_DIS(bool value){
+void PMIC_BQ25622::setVSYS_ADC_DIS(bool value){
     adc_dis_reg_t temp_reg;
     _read(ADC_Function_Disable_0, (uint8_t*)&temp_reg);
     temp_reg.vsys_adc_dis = value;
     _write(ADC_Function_Disable_0, (uint8_t*)&temp_reg);
 }
-void PMIC_BQ25622::setVBAT_DIS(bool value){
+void PMIC_BQ25622::setVBAT_ADC_DIS(bool value){
     adc_dis_reg_t temp_reg;
     _read(ADC_Function_Disable_0, (uint8_t*)&temp_reg);
     temp_reg.vbat_adc_dis = value;
     _write(ADC_Function_Disable_0, (uint8_t*)&temp_reg);
 }
-void PMIC_BQ25622::setVBUS_DIS(bool value){
+void PMIC_BQ25622::setVBUS_ADC_DIS(bool value){
     adc_dis_reg_t temp_reg;
     _read(ADC_Function_Disable_0, (uint8_t*)&temp_reg);
     temp_reg.vbus_adc_dis = value;
     _write(ADC_Function_Disable_0, (uint8_t*)&temp_reg);
 }
-void PMIC_BQ25622::setIBAT_DIS(bool value){
+void PMIC_BQ25622::setIBAT_ADC_DIS(bool value){
     adc_dis_reg_t temp_reg;
     _read(ADC_Function_Disable_0, (uint8_t*)&temp_reg);
     temp_reg.ibat_adc_dis = value;
     _write(ADC_Function_Disable_0, (uint8_t*)&temp_reg);
 }
-void PMIC_BQ25622::setIBUS_DIS(bool value){
+void PMIC_BQ25622::setIBUS_ADC_DIS(bool value){
     adc_dis_reg_t temp_reg;
     _read(ADC_Function_Disable_0, (uint8_t*)&temp_reg);
     temp_reg.ibus_adc_dis = value;
@@ -371,14 +543,14 @@ void PMIC_BQ25622::setIBUS_DIS(bool value){
 }
 
 // REG2A
-ichgr_reg_t PMIC_BQ25622::getICHGR_reg(){
-    ichgr_reg_t temp_reg;
+ibat_reg_t PMIC_BQ25622::getIBAT_reg(){
+    ibat_reg_t temp_reg;
 	_read2(IBAT_ADC_LSB, (uint16_t*)&temp_reg);
     return temp_reg;
 }
-uint16_t PMIC_BQ25622::getICHGR(){
-    ichgr_reg_t temp_reg = PMIC_BQ25622::getICHGR_reg();
-    uint16_t data = temp_reg.ichgr * 4.0;
+uint16_t PMIC_BQ25622::getIBAT(){
+    ibat_reg_t temp_reg = PMIC_BQ25622::getIBAT_reg();
+    uint16_t data = temp_reg.ibat * 4.0;
     return data;
 }
 

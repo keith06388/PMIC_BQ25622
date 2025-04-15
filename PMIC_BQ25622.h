@@ -17,11 +17,14 @@ typedef enum {
     Input_Current_Limit_MSB    	= 0x07,
     Input_Voltage_Limit_LSB    	= 0x08,
     Input_Voltage_Limit_MSB    	= 0x09,
+    Minimal_System_Voltage_LSB	= 0x0E,
+    Minimal_System_Voltage_MSB	= 0x0F,
 	Precharge_Control_LSB		= 0x10,
 	Precharge_Control_MSB		= 0x11,
     Termination_Control_LSB    	= 0x12,
     Termination_Control_MSB  	= 0x13,
     Charge_Control_0        	= 0x14,
+    Charge_Timer_Control    	= 0x15,
 	Charger_Control_1       	= 0x16,
 	Charger_Control_2       	= 0x17,
     Charger_Control_4       	= 0x19,
@@ -66,6 +69,12 @@ typedef struct {
 } vindpm_reg_t __attribute__(());
 
 typedef struct {
+	uint8_t reserved:6;
+    uint16_t vsysmin:6;
+    uint8_t reserved1:4;
+} vsysmin_reg_t __attribute__(());
+
+typedef struct {
 	uint8_t reserved:4;
     uint16_t iprechg:5;
     uint8_t reserved1:7;
@@ -86,6 +95,17 @@ typedef struct {
     uint8_t q4_fullon:1;
     uint8_t q1_fullon:1;
 } ctrl0_reg_t __attribute__(());
+
+typedef struct {
+    uint8_t dis_stat:1;
+    uint8_t en_auto_indet:1;
+    uint8_t force_indet:1;
+    uint8_t en_dcp_bias:1;
+    uint8_t tmr2x_en:1;
+    uint8_t en_safety_tmrs:1;
+    uint8_t prechg_tmr:1;
+    uint8_t chg_timer:1;
+} chg_timer_0_reg_t __attribute__(());
 
 typedef struct {
 	uint8_t watchdog:2;
@@ -143,8 +163,8 @@ typedef struct {
 
 typedef struct {
 	uint8_t reserved:2;
-	uint16_t ichgr:14;
-} ichgr_reg_t __attribute__(());
+	uint16_t ibat:14;
+} ibat_reg_t __attribute__(());
 
 typedef struct {
 	uint8_t reserved:2;
@@ -211,6 +231,11 @@ public:
 	bq25622_error_t setVINDPM(int value);
 	uint16_t getVINDPM();
 
+    // REG0E
+    vsysmin_reg_t getVSYSMIN_reg();
+    bq25622_error_t setVSYSMIN(int value);
+    uint16_t getVSYSMIN();
+
 	// REG10
 	ipre_reg_t getIPRE_reg();
 	bq25622_error_t setIPRECHG(int value);
@@ -221,20 +246,34 @@ public:
 	bq25622_error_t setITERM(int value);
 	uint16_t getITERM();
 
+    // REG13
+    chg_timer_0_reg_t getCHG_TIMER_reg();
+    void setTS_DIS(bool value);
+    void setEN_AUTO_INDET(bool value);
+    void setFORCE_INDET(bool value);
+    void setEN_DCP_BIAS(bool value);
+    void setTMR2X_EN(bool value);
+    void setEN_SAFETY_TMR(bool value);
+    void setPRECHG_TMR(bool value);
+    void setCHG_TIMER(bool value);
+
 	// REG14
 	ctrl0_reg_t getCTRL0_reg();
 	void setQ1_FULLON(bool value);
 	void setQ4_FULLON(bool value);
+    bq25622_error_t setTOPOFF_TMR(int value);
 	
 	// REG16
 	ctrl1_reg_t getCTRL1_reg();
 	void setEN_CHG(bool value);
-	void setWATCHDOG(bool value);
+	bq25622_error_t setWATCHDOG(int value);
 
 	// REG17
 	ctrl2_reg_t getCTRL2_reg();
+    bq25622_error_t setVBUS_OVP(int value);
 	void setCONV_STRN(int value);
 	void setCONV_FREQ(int value);
+    bq25622_error_t setTREG(int value);
 	void setREG_RST(bool value);
 
 	// REG19
@@ -250,21 +289,23 @@ public:
 	void setCONV_START(bool value);
 	void setCONV_RATE(bool value);
 	bq25622_error_t setADC_SAMPLE(int value);
+    void setADC_AVG(bool value);
+    void setADC_AVG_INIT(bool value);
 
 	// REG27
 	adc_dis_reg_t getADC_DIS_reg();
-	void setVPMID_DIS(bool value);
-	void setTDIE_DIS(bool value);
-	void setTS_DIS(bool value);
-	void setVSYS_DIS(bool value);
-	void setVBAT_DIS(bool value);
-	void setVBUS_DIS(bool value);
-	void setIBAT_DIS(bool value);
-	void setIBUS_DIS(bool value);
+	void setVPMID_ADC_DIS(bool value);
+	void setTDIE_ADC_DIS(bool value);
+	void setTS_ADC_DIS(bool value);
+	void setVSYS_ADC_DIS(bool value);
+	void setVBAT_ADC_DIS(bool value);
+	void setVBUS_ADC_DIS(bool value);
+	void setIBAT_ADC_DIS(bool value);
+	void setIBUS_ADC_DIS(bool value);
 
 	// REG2A
-	ichgr_reg_t getICHGR_reg();
-	uint16_t getICHGR();
+	ibat_reg_t getIBAT_reg();
+	uint16_t getIBAT();
 
 	// REG2C
 	vbusv_reg_t getVBUSV_reg();
