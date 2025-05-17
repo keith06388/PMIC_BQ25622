@@ -419,7 +419,7 @@ void PMIC_BQ25622::setEN_EXTLIM(bool value){
     _write(Charger_Control_4, (uint8_t*)&temp_reg);
 }
 
-// REG 1A
+// REG1A
 ntc_reg_t PMIC_BQ25622::getNTC_reg(){
     ntc_reg_t temp_reg;
     _read(NTC_Control_0, (uint8_t*)&temp_reg);
@@ -430,6 +430,102 @@ void PMIC_BQ25622::setTS_IGNORE(bool value){
     _read(NTC_Control_0, (uint8_t*)&temp_reg);
     temp_reg.ts_ignore = value;
     _write(NTC_Control_0, (uint8_t*)&temp_reg);
+}
+
+// REG1D
+chrg_status_0_reg_t PMIC_BQ25622::getCHRG_STATUS_0_reg(){
+    chrg_status_0_reg_t temp_reg;
+    _read(Charger_Status_0, (uint8_t*)&temp_reg);
+    return temp_reg;
+}
+bool PMIC_BQ25622::getWD_STAT(){
+    chrg_status_0_reg_t temp_reg;
+    _read(Charger_Status_0, (uint8_t*)&temp_reg);
+    return temp_reg.wd_stat;
+}
+bool PMIC_BQ25622::getSAFETY_TMR_STAT(){
+    chrg_status_0_reg_t temp_reg;
+    _read(Charger_Status_0, (uint8_t*)&temp_reg);
+    return temp_reg.safery_tmr_stat;
+}
+bool PMIC_BQ25622::getVINDPM_STAT(){
+    chrg_status_0_reg_t temp_reg;
+    _read(Charger_Status_0, (uint8_t*)&temp_reg);
+    return temp_reg.vindpm_stat;
+}
+bool PMIC_BQ25622::getIINDPM_STAT(){
+    chrg_status_0_reg_t temp_reg;
+    _read(Charger_Status_0, (uint8_t*)&temp_reg);
+    return temp_reg.iindpm_stat;
+}
+bool PMIC_BQ25622::getVSYS_STAT(){
+    chrg_status_0_reg_t temp_reg;
+    _read(Charger_Status_0, (uint8_t*)&temp_reg);
+    return temp_reg.vsys_stat;
+}
+bool PMIC_BQ25622::getTREG_STAT(){
+    chrg_status_0_reg_t temp_reg;
+    _read(Charger_Status_0, (uint8_t*)&temp_reg);
+    return temp_reg.treg_stat;
+}
+bool PMIC_BQ25622::getADC_DONE_STAT(){
+    chrg_status_0_reg_t temp_reg;
+    _read(Charger_Status_0, (uint8_t*)&temp_reg);
+    return temp_reg.adc_done_stat;
+}
+
+// REG1E
+chrg_status_1_reg_t PMIC_BQ25622::getCHRG_STATUS_1_reg(){
+    chrg_status_1_reg_t temp_reg;
+    _read(Charger_Status_1, (uint8_t*)&temp_reg);
+    return temp_reg;
+}
+bool PMIC_BQ25622::getVBUS_STAT(){
+    chrg_status_1_reg_t temp_reg;
+    _read(Charger_Status_1, (uint8_t*)&temp_reg);
+    return temp_reg.vbus_stat;
+}
+bool PMIC_BQ25622::getCHG_STAT(){
+    chrg_status_1_reg_t temp_reg;
+    _read(Charger_Status_1, (uint8_t*)&temp_reg);
+    return temp_reg.chg_stat;
+}
+
+// REG1F
+fault_status_0_reg_t PMIC_BQ25622::getFAULT_STATUS_0_reg(){
+    fault_status_0_reg_t temp_reg;
+    _read(Fault_Status_0, (uint8_t*)&temp_reg);
+    return temp_reg;
+}
+bool PMIC_BQ25622::getTS_STAT(){
+    fault_status_0_reg_t temp_reg;
+    _read(Fault_Status_0, (uint8_t*)&temp_reg);
+    return temp_reg.ts_stat;
+}
+bool PMIC_BQ25622::getTSHUT_FAULT(){
+    fault_status_0_reg_t temp_reg;
+    _read(Fault_Status_0, (uint8_t*)&temp_reg);
+    return temp_reg.tshut_fault;
+}
+bool PMIC_BQ25622::getOTG_FAULT(){
+    fault_status_0_reg_t temp_reg;
+    _read(Fault_Status_0, (uint8_t*)&temp_reg);
+    return temp_reg.otg_fault;
+}
+bool PMIC_BQ25622::getSYS_FAULT(){
+    fault_status_0_reg_t temp_reg;
+    _read(Fault_Status_0, (uint8_t*)&temp_reg);
+    return temp_reg.sys_fault;
+}
+bool PMIC_BQ25622::getBAT_FAULT(){
+    fault_status_0_reg_t temp_reg;
+    _read(Fault_Status_0, (uint8_t*)&temp_reg);
+    return temp_reg.bat_fault;
+}
+bool PMIC_BQ25622::getVBUS_FAULT(){
+    fault_status_0_reg_t temp_reg;
+    _read(Fault_Status_0, (uint8_t*)&temp_reg);
+    return temp_reg.vbus_fault;
 }
 
 // REG26

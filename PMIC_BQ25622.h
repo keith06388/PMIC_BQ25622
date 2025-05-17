@@ -29,6 +29,9 @@ typedef enum {
 	Charger_Control_2       	= 0x17,
     Charger_Control_4       	= 0x19,
     NTC_Control_0    			= 0x1A,
+    Charger_Status_0       	    = 0x1D,
+    Charger_Status_1       	    = 0x1E,
+    Fault_Status_0        	    = 0x1F,
     ADC_Control       			= 0x26,
     ADC_Function_Disable_0  	= 0x27,
     IBAT_ADC_LSB   				= 0x2A,
@@ -140,6 +143,32 @@ typedef struct {
     uint8_t reserved:3;
     uint8_t ts_ignore:1;
 } ntc_reg_t __attribute__(());
+
+typedef struct {
+    uint8_t wd_stat:1;
+    uint8_t safery_tmr_stat:1;
+    uint8_t vindpm_stat:1;
+    uint8_t iindpm_stat:1;
+    uint8_t vsys_stat:1;
+    uint8_t treg_stat:1;
+    uint8_t adc_done_stat:1;
+    uint8_t reserved:1;
+} chrg_status_0_reg_t __attribute__(());
+
+typedef struct {
+    uint8_t vbus_stat:3;
+    uint8_t chg_stat:2;
+    uint8_t reserved:3;
+} chrg_status_1_reg_t __attribute__(());
+
+typedef struct {
+    uint8_t ts_stat:3;
+    uint8_t tshut_fault:1;
+    uint8_t otg_fault:1;
+    uint8_t sys_fault:1;
+    uint8_t bat_fault:1;
+    uint8_t vbus_fault:1;
+} fault_status_0_reg_t __attribute__(());
 
 typedef struct {
     uint8_t reserved:2;
@@ -280,9 +309,33 @@ public:
 	ctrl4_reg_t getCTRL4_reg();
 	void setEN_EXTLIM(bool value);
 
-	// REG 1A
+	// REG1A
 	ntc_reg_t getNTC_reg();
 	void setTS_IGNORE(bool value);
+
+    // REG1D
+    chrg_status_0_reg_t getCHRG_STATUS_0_reg();
+    bool getWD_STAT();
+    bool getSAFETY_TMR_STAT();
+    bool getVINDPM_STAT();
+    bool getIINDPM_STAT();
+    bool getVSYS_STAT();
+    bool getTREG_STAT();
+    bool getADC_DONE_STAT();
+    
+    // REG1E
+    chrg_status_1_reg_t getCHRG_STATUS_1_reg();
+    bool getVBUS_STAT();
+    bool getCHG_STAT();
+
+    // REG1F
+    fault_status_0_reg_t getFAULT_STATUS_0_reg();
+    bool getTS_STAT();
+    bool getTSHUT_FAULT();
+    bool getOTG_FAULT();
+    bool getSYS_FAULT();
+    bool getBAT_FAULT();
+    bool getVBUS_FAULT();
 
 	// REG26
 	adc_ctrl_reg_t getADC_CTRL_reg();
